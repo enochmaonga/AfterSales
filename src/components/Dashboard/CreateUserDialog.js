@@ -8,30 +8,26 @@ import TextField from "@mui/material/TextField";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { IconButton, InputAdornment, MenuItem, Select } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import PropTypes from 'prop-types';
-import { SERVER_URL } from '../../config';
+import PropTypes from "prop-types";
+import { SERVER_URL } from "../../config";
 
 const initialFormData = {
-  userName: "",
+  username: "",
   password: "",
   name: "",
-  phoneNumber: "",
+  phone: "",
   email: "",
   userType: "",
 };
 
-const userTypeOptions = [
-  "User",
-  "Admin",
-  "Technician",
-  // Add more supplier options as needed
-];
+const userTypeOptions = ["User", "Admin", "Technician"];
 
 const CreateUserDialog = ({ open, onClose, onSave }) => {
   const [formData, setFormData] = useState(initialFormData);
   const [response, setResponse] = useState(null);
   const [mainDialogOpen, setMainDialogOpen] = useState(true);
-  const [errors, setErrors] = useState({}); // Track validation errors
+  const [errors, setErrors] = useState({});
+
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -46,59 +42,75 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
     });
   };
 
-  const handleSave = async () => {
-    // Validate form data before saving
-    const validationErrors = {};
-    if (!formData.name) {
-      validationErrors.name = "name is required";
-    }
-    if (!formData.userName) {
-      validationErrors.userName = "userName is required";
-    }
-    if (!formData.password) {
-      validationErrors.password = "password is required";
-    }
-    if (!formData.phoneNumber) {
-      validationErrors.phoneNumber = "phoneNumber is required";
-    }
-    if (!formData.email) {
-      validationErrors.email = "email is required";
-    }
-    if (!formData.userType) {
-      validationErrors.userType = "userType is required";
-    }
-
-    if (Object.keys(validationErrors).length > 0) {
-      // There are validation errors, do not proceed with saving
-      setResponse({ type: "error", message: "Please fix validation errors" });
-      return;
-    }
+  const createUser = async () => {
     try {
       const response = await fetch(`${SERVER_URL}/register`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
+      console.log("SERVER", response);
 
       if (response.status === 201) {
         // User created successfully
-        setResponse({ type: 'success', message: 'User created successfully' });
+        setResponse({ type: "success", message: "User created successfully" });
         onSave();
       } else {
         // Handle server error or validation errors
         const responseData = await response.json();
-        setResponse({ type: 'error', message: responseData.message || 'An error has occurred' });
+        setResponse({
+          type: "error",
+          message: responseData.message || "An error has occurred",
+        });
       }
     } catch (error) {
+      console.error("Error:", error);
       setResponse({
-        type: 'error',
-        message: 'Failed to create User. Please try again later',
+        type: "error",
+        message: "Failed to create user. Please try again later",
       });
     } finally {
       // Close the main dialog after saving, regardless of success or error
       setMainDialogOpen(false);
+    }
+  };
+
+  const handleSave = () => {
+    // Validate form data before creating the user
+    const validationErrors = {};
+    if (!formData.name) {
+      validationErrors.name = "Name is required";
+    }
+    if (!formData.username) {
+      validationErrors.username = "Username is required";
+    }
+    if (!formData.password) {
+      validationErrors.password = "Password is required";
+    }
+    if (!formData.phone) {
+      validationErrors.phone = "Phone number is required";
+    }
+    if (!formData.email) {
+      validationErrors.email = "Email is required";
+    }
+    if (!formData.userType) {
+      validationErrors.userType = "User type is required";
+    }
+    console.log("Data Entry", formData);
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      const formDataArray = Object.values(formData);
+
+      //log the array
+      console.log("Data Entry Array", formDataArray);
+      createUser();
+    } else {
+      // There are validation errors, do not proceed with saving
+      setResponse({ type: "error", message: "Please fix validation errors" });
     }
   };
 
@@ -111,25 +123,28 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
 
   return (
     <>
-      {mainDialogOpen && ( // Conditionally render the main dialog
+      {mainDialogOpen && (
+        
         <Dialog
           open={open}
           onClose={handleCloseResponse}
           PaperProps={{
             style: {
-              borderRadius: "20px", // Adjust the value to your desired borderRadius
+              borderRadius: "20px",
             },
           }}
         >
           <DialogTitle>Create User</DialogTitle>
           <DialogContent>
             <TextField
-              name="userName"
+              name="username"
               label="User Name"
               fullWidth
-              value={formData.userName}
+              value={formData.username}
               onChange={handleChange}
               style={{ marginBottom: 6, marginTop: 6 }}
+              error={errors.username}
+              helperText={errors.username}
             />
             <TextField
               name="password"
@@ -139,6 +154,8 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
               value={formData.password}
               onChange={handleChange}
               style={{ marginBottom: 6, marginTop: 6 }}
+              error={errors.password}
+              helperText={errors.password}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -156,15 +173,19 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
               value={formData.name}
               onChange={handleChange}
               style={{ marginBottom: 6, marginTop: 6 }}
+              error={errors.name}
+              helperText={errors.name}
             />
             <TextField
-              name="phoneNumber"
+              name="phone"
               label="Phone Number"
-              type="number"
+              type="tel"
               fullWidth
-              value={formData.phoneNumber}
+              value={formData.phone}
               onChange={handleChange}
               style={{ marginBottom: 6, marginTop: 6 }}
+              error={errors.phone}
+              helperText={errors.phone}
             />
             <TextField
               name="email"
@@ -174,15 +195,19 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
               value={formData.email}
               onChange={handleChange}
               style={{ marginBottom: 6, marginTop: 6 }}
+              error={errors.email}
+              helperText={errors.email}
             />
             <Select
               name="userType"
-              label="UserType"
-              placeholder="userType"
+              label="User Type"
+              placeholder="User Type"
               fullWidth
               value={formData.userType}
               onChange={handleChange}
               style={{ marginBottom: 6, marginTop: 6 }}
+              error={errors.userType}
+              helperText={errors.userType}
             >
               {userTypeOptions.map((option) => (
                 <MenuItem key={option} value={option}>
@@ -191,12 +216,13 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
               ))}
             </Select>
           </DialogContent>
+        
           <DialogActions>
             <Button onClick={handleCloseResponse} color="primary">
               Close
             </Button>
             <Button onClick={handleSave} color="primary">
-              Save
+              Create
             </Button>
           </DialogActions>
         </Dialog>
@@ -207,7 +233,7 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
           onClose={handleCloseResponse}
           PaperProps={{
             style: {
-              borderRadius: "20px", // Adjust the value to your desired borderRadius
+              borderRadius: "20px",
             },
           }}
         >
@@ -231,9 +257,11 @@ const CreateUserDialog = ({ open, onClose, onSave }) => {
     </>
   );
 };
+
 CreateUserDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
 };
+
 export default CreateUserDialog;

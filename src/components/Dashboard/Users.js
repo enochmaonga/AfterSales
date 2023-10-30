@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Typography,
@@ -18,6 +18,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import CreateUserDialog from "./CreateUserDialog";
+import { SERVER_URL } from "@/config";
+import DeleteUserDialog from "./DeleteUser";
 
 const BoldTableCell = styled(TableCell)({
   fontWeight: "bold",
@@ -26,12 +28,11 @@ const BoldTableCell = styled(TableCell)({
 
 function Users() {
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
-  const [user, setUser] = useState([]);
-  const [users, setUsers] = useState([]);
-
-  const handleSearchInputChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  const [users, setUsers] = useState([]); // Change the state name to "users" to avoid confusion
+  const userData = users || [];
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+const [selectedUserId, setSelectedUserId] = useState(null);
+ 
 
   const handleOpenCreateDialog = () => {
     setCreateDialogOpen(true);
@@ -41,14 +42,9 @@ function Users() {
     setCreateDialogOpen(false);
   };
 
-  const handleSaveUser = (formData) => {
-  
-    setUser([...user, formData]);
-  };
-
   const handleRegisterUser = async (formData) => {
     try {
-      const response = await fetch("/register", {
+      const response = await fetch(`${SERVER_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,7 +55,9 @@ function Users() {
       if (response.status === 201) {
         // User registration was successful, you can update the UI as needed.
         const result = await response.json();
-        console.log(result.success); // This will log the success message from the server.
+        console.log(result.success); 
+    
+        // This will log the success message from the server.
       } else {
         // Handle registration error, e.g., show an error message to the user.
         console.error("User registration failed");
@@ -69,33 +67,72 @@ function Users() {
     }
   };
 
-  const dummyUsers = [
-    {
-      id: 1,
-      name: "John Doe",
-      userName: "jdoes",
-      email: "john@example.com",
-      phone: "0722888657",
-      userType: "User",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      userName: "jsmith",
-      email: "jane@example.com",
-      phone: "0754763527",
-      userType: "Admin",
-    },
-    {
-      id: 2,
-      name: "Joseph Ombiro",
-      userName: "jombiro",
-      email: "jombiro@gmail.com",
-      phone: "0754768727",
-      userType: "Admin",
-    },
-  ];
+  const handleDeleteUser = (userId) => {
+    setSelectedUserId(userId);
+    setDeleteDialogOpen(true);
+  };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${SERVER_URL}/users`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (response.status === 200) {
+          const responseData = await response.json();
+          
+          if (Array.isArray(responseData.body)) {
+            if (responseData.body.length > 0) {
+              setUsers(responseData.body);
+            } else {
+              console.log("No data received from the server");
+            }
+           
+          } else {
+            console.error("Data from the server is not an array:", responseData.body);
+          }
+        } else {
+          console.error("Server error:", response.status);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  console.log("OBJECT:", users);
+
+ const handleConfirmDelete = async () => {
+  try {
+    // Send a request to delete the user using the selectedUserId
+    const response = await fetch(`${SERVER_URL}/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 200) {
+
+      console.log("User deleted successfully");
+      // Refresh the user list or update the UI here
+    } else {
+      console.error("User deletion failed");
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+  }
+};
+
+const handleCloseDeleteDialog = () => {
+  setDeleteDialogOpen(false); 
+};
+  
   return (
     <Container maxWidth="xl">
       <Typography
@@ -149,6 +186,7 @@ function Users() {
         <Table>
           <TableHead>
             <TableRow>
+            <BoldTableCell>id</BoldTableCell>
               <BoldTableCell>Name</BoldTableCell>
               <BoldTableCell>User Name</BoldTableCell>
               <BoldTableCell>Phone</BoldTableCell>
@@ -157,27 +195,40 @@ function Users() {
               <BoldTableCell>Action</BoldTableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {(users.length > 0 ? users : dummyUsers).map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.userName}</TableCell>
-                <TableCell>{user.phone}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.userType}</TableCell>
-                <TableCell>
-                  <IconButton
-                    aria-label="Delete"
-                    onClick={() => handleDeactivate(user.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+              <TableBody>
+                {Array.isArray(users) ? (
+              users.map((user) => (
+                <TableRow key={user._id}>
+                  <TableCell>{user._id}</TableCell>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell>{user.phone}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.userType}</TableCell>
+                  <TableCell>
+                    <IconButton
+                      aria-label="Delete"
+                      onClick={() => handleDeleteUser(user._id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+                ) : (
+              <TableRow>
+                <TableCell colSpan={7}>No Data</TableCell>
+                </TableRow>
+                )}
+            </TableBody>
         </Table>
       </Card>
+
+      <DeleteUserDialog
+      open={isDeleteDialogOpen}
+      onClose={handleCloseDeleteDialog}
+      onDelete={handleConfirmDelete} // Pass the delete function
+    />
     </Container>
   );
 }

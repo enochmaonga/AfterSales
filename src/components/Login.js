@@ -18,7 +18,6 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const SERVER_URL = 'http://localhost:4002';
     try {`${SERVER_URL}/login`
     const response = await fetch(`${SERVER_URL}/login`, {
       method: 'POST',
@@ -32,6 +31,8 @@ const Login = () => {
         const data = await response.json();
         const token = data.token;
 
+       
+
          // Store the token in localStorage or a secure storage method
       localStorage.setItem('token', token);
 
@@ -40,7 +41,7 @@ const Login = () => {
         // Redirect to the dashboard page or any other route
         router.push('/repairs'); // Replace with your actual dashboard route
       } else {
-        console.log('Login failed');
+        console.log('Login failed', error);
         setError('check your username or password again');
       }
     } catch (error) {
@@ -48,6 +49,10 @@ const Login = () => {
       setError('An error occurred while logging in.');
     }
   };
+
+  console.log('Username:', username);
+  console.log('Password:', password);
+  
 
   return (
     <Box
