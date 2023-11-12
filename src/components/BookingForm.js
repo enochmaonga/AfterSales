@@ -63,7 +63,7 @@ function BookingForm({ initialValues, formValues, sections }) {
     BookingFormStep1,
     BookingFormStep2,
     BookingFormStep3,
-    BookingFormStep4,
+    BookingFormSummary,
   ];
 
   const CurrentStep = steps[step - 1];
@@ -438,7 +438,7 @@ const BookingFormStep3 = ({ initialValues, step }) => {
     </Form>
   );
 };
-const BookingFormStep4 = ({ formValues, capturedValues, handlePrint }) => {
+const BookingFormSummary = ({ formValues, capturedValues, handlePrint }) => {
   const sections = [
     {
       title: "Personal Information",
@@ -491,17 +491,18 @@ const BookingFormStep4 = ({ formValues, capturedValues, handlePrint }) => {
       ))}
       <Grid container spacing={2} justifyContent="center" sx={{ padding: 5 }}>
         <Grid item>
-        <Button variant="contained" 
-        sx={{ borderRadius: 3 }}
-        onClick={handlePrint}
-        >
-          Print
-        </Button>
+          <Button
+            variant="contained"
+            sx={{ borderRadius: 3 }}
+            onClick={handlePrint}
+          >
+            Print
+          </Button>
         </Grid>
         <Grid item>
-        <Button variant="contained" type="submit" sx={{ borderRadius: 3 }}>
-          Submit
-        </Button>
+          <Button variant="contained" type="submit" sx={{ borderRadius: 3 }}>
+            Submit
+          </Button>
         </Grid>
       </Grid>
     </Box>

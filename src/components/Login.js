@@ -18,7 +18,7 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    try {`${SERVER_URL}/login`
+    try {
     const response = await fetch(`${SERVER_URL}/login`, {
       method: 'POST',
       headers: {
@@ -26,7 +26,7 @@ const Login = () => {
       },
       body: JSON.stringify({ username, password }),
     });
-
+    console.log('Response Status:', response.status);
       if (response.ok) {
         const data = await response.json();
         const token = data.token;
@@ -41,8 +41,8 @@ const Login = () => {
         // Redirect to the dashboard page or any other route
         router.push('/repairs'); // Replace with your actual dashboard route
       } else {
-        console.log('Login failed', error);
-        setError('check your username or password again');
+        console.log('Login failed', response);
+        setError('check your username or password and try again');
       }
     } catch (error) {
       console.error('Error logging in:', error);

@@ -14,12 +14,15 @@ import {
   InputAdornment,
   Grid,
   Button,
+  TablePagination,
+  Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import CreateUserDialog from "./CreateUserDialog";
 import { SERVER_URL } from "@/config";
 import DeleteUserDialog from "./DeleteUser";
+import UserShimmer from "./UserShimmers";
 
 const BoldTableCell = styled(TableCell)({
   fontWeight: "bold",
@@ -32,6 +35,9 @@ function Users() {
   const userData = users || [];
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 const [selectedUserId, setSelectedUserId] = useState(null);
+
+const [currentPage, setCurrentPage] = useState(0); // Track the current page
+const usersPerPage = 5; // Number of users to display per page
  
 
   const handleOpenCreateDialog = () => {
@@ -56,7 +62,7 @@ const [selectedUserId, setSelectedUserId] = useState(null);
         // User registration was successful, you can update the UI as needed.
         const result = await response.json();
         console.log(result.success); 
-    
+  
         // This will log the success message from the server.
       } else {
         // Handle registration error, e.g., show an error message to the user.
@@ -132,6 +138,14 @@ const [selectedUserId, setSelectedUserId] = useState(null);
 const handleCloseDeleteDialog = () => {
   setDeleteDialogOpen(false); 
 };
+
+const handlePageChange = (event, newPage) => {
+  setCurrentPage(newPage);
+};
+
+// Calculate the index range for the users to display on the current page
+const startIndex = currentPage * usersPerPage;
+const endIndex = startIndex + usersPerPage;
   
   return (
     <Container maxWidth="xl">
@@ -197,7 +211,7 @@ const handleCloseDeleteDialog = () => {
           </TableHead>
               <TableBody>
                 {Array.isArray(users) ? (
-              users.map((user) => (
+              users.slice(startIndex, endIndex).map((user) => (
                 <TableRow key={user._id}>
                   <TableCell>{user._id}</TableCell>
                   <TableCell>{user.name}</TableCell>
@@ -216,12 +230,21 @@ const handleCloseDeleteDialog = () => {
                 </TableRow>
               ))
                 ) : (
-              <TableRow>
-                <TableCell colSpan={7}>No Data</TableCell>
-                </TableRow>
+                  [1,2,3,4,5].map((index) => <UserShimmer key={index} />)
                 )}
             </TableBody>
         </Table>
+        <Box sx={{display: "flex", alignContent: "center", justifyContent: "center"}}>
+        <TablePagination
+          component="div"
+          count={users.length}
+          page={currentPage}
+          onPageChange={handlePageChange}
+          rowsPerPage={usersPerPage}
+          rowsPerPageOptions={[]}
+         
+        />
+        </Box>
       </Card>
 
       <DeleteUserDialog
