@@ -205,7 +205,7 @@ const BookingFormStep1 = ({ initialValues, step }) => {
         <Typography variant="h5">Personal Information</Typography>
       </Box>
       <Grid container spacing={2} sx={{ padding: 5 }}>
-        <Grid item xs={12} sm={10} md={8} xl={4}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
           <TextField
             id="firstName"
             name="firstName"
@@ -214,7 +214,7 @@ const BookingFormStep1 = ({ initialValues, step }) => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={10} md={8} xl={4}>
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
           <TextField
             id="middleName"
             name="middleName"
@@ -223,7 +223,7 @@ const BookingFormStep1 = ({ initialValues, step }) => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={10} md={8} xl={4}>
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
           <TextField
             id="lastName"
             name="lastName"
@@ -232,7 +232,7 @@ const BookingFormStep1 = ({ initialValues, step }) => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={10} md={8} xl={4}>
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
           <TextField
             id="email"
             name="email"
@@ -241,7 +241,7 @@ const BookingFormStep1 = ({ initialValues, step }) => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={10} md={8} xl={4}>
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
           <TextField
             id="phoneNumber"
             name="phoneNumber"
@@ -250,7 +250,7 @@ const BookingFormStep1 = ({ initialValues, step }) => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={10} md={8} xl={4}>
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
           <TextField
             id="alternativePhoneNumber"
             name="alternativePhoneNumber"
