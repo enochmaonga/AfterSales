@@ -130,8 +130,8 @@ Modal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   modalContent: PropTypes.node.isRequired, // Changed PropTypes.element to PropTypes.node
-  responsive: PropTypes.bool.isRequired,
-  fullScreen: PropTypes.bool.isRequired,
+  responsive: PropTypes.bool,
+  fullScreen: PropTypes.bool,
   maxWidth: PropTypes.string.isRequired,
   modalHeader: PropTypes.element,
   fullWidth: PropTypes.bool.isRequired,

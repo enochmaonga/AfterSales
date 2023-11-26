@@ -17,23 +17,33 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import SummaryTable from "./SummaryTable";
 import { SERVER_URL } from "@/config";
+import SummaryTable from "../SummaryTable";
 
 const validationSchema = Yup.object({
   // Define validation rules for your form fields
   firstName: Yup.string().required("required"),
-  laststName: Yup.string().required("required"),
-  phoneNumber: Yup.number()
+  middleName: Yup.string().required("required"),
+  lastName: Yup.string().required("required"),
+  phoneNumber: Yup.string()
     .required("required")
     .min(10, "phone number must be at least 10 digits"),
   email: Yup.string().required("required"),
-  otherPhoneNumber: Yup.number()
+  otherPhoneNumber: Yup.string()
     .required("required")
     .min(10, "phone number must be at least 10 digits"),
-  imei: Yup.number().required("required"),
+  imei: Yup.string().required("required"),
   deviceMake: Yup.string().required("required"),
   model: Yup.string().required("required"),
+  dateOfPurchase: Yup.string().required("required"),
+  placeOfPurchase: Yup.string().required("required"),
+  warrantyStatus: Yup.string().required("required"),
+  display: Yup.string().required("required"),
+  power: Yup.string().required("required"),
+  sound: Yup.string().required("required"),
+  software: Yup.string().required("required"),
+  other: Yup.string().required("required"),
+  additionalInformation: Yup.string().required("required"),
 });
 
 const steps = ["Customer Details", "Phone Details", "Fault Details", "Summary"];
@@ -70,7 +80,11 @@ const software = ["Goes on and off", "Needs software update", "Other", "N/A"];
 const Form1 = () => {
   // const classes = useStyles();
   const formik = useFormik({
-   
+    initialValues: {
+    //   itemName: "",
+    //   quantity: "",
+    //   category: "",
+    },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       // Handle form submission
@@ -96,20 +110,17 @@ const Form1 = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const allFormValues = { ...formik.values, ...formValues };
-    handleNewBooking(allFormValues); // Call handleTest with the form data
-    console.log('Submitted:', { firstName, lastName });
+    handleNewBooking(allFormValues);
+    console.log('Submitted:', formik.values);
   };
 
   const handleNewBooking = (allFormValues) => {
-
     // Send a POST request to the server
-    fetch(`${SERVER_URL}/booking`, {
+    fetch(`${SERVER_URL}/newbooking`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-       
       },
-
       body: JSON.stringify(allFormValues),
     })
       .then((response) => {
@@ -119,12 +130,11 @@ const Form1 = () => {
         return response.json();
       })
       .then((data) => {
+        console.log("Server response:", data);
         // Handle success, e.g., show a success message to the user
-        console.log("Server response:", jwtToken);
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
-     
       });
   };
 

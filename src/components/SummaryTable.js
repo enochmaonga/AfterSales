@@ -127,7 +127,7 @@ const SummaryTable = ({ formValues }) => {
             <strong>Additional Information:</strong>
           </TableCell>
           <TableCell>
-            {formValues.additionalInformtion}
+            {formValues.additionalInformation}
           </TableCell>
         </TableRow>
       </TableBody>
