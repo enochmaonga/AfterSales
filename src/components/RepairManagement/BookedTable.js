@@ -1,3 +1,4 @@
+import { SERVER_URL } from "@/config";
 import {
   Table,
   TableBody,
@@ -10,50 +11,8 @@ import {
 } from "@mui/material";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const customersData = [
-  {
-    id: 1,
-    customerName: "John Doe",
-    phoneNumber: "0773 764-309",
-    phoneMake: "iPhone",
-    phoneModel: "12 Pro",
-    imei: "123456789012345",
-    faults: "Does not power",
-    duration: "2 days",
-  },
-  {
-    id: 2,
-    customerName: "Jane Smith",
-    phoneNumber: "0721 654-564",
-    phoneMake: "Samsung Galaxy",
-    phoneModel: " S21",
-    imei: "987654321098765",
-    faults: "Does not power",
-    duration: "8 days",
-  },
-  {
-    id: 3,
-    customerName: "Andrew Mondo",
-    phoneNumber: "0723 654-321",
-    phoneMake: "Samsung Galaxy",
-    phoneModel: "A10",
-    imei: "987654321786543",
-    faults: "Broken screen",
-    duration: "5 days",
-  },
-  {
-    id: 3,
-    customerName: "Jackson Alex J",
-    phoneNumber: "0723 654-321",
-    phoneMake: "Oppo",
-    phoneModel: "A9 2020",
-    imei: "987654321786543",
-    faults: "Forgot Passcode",
-    duration: "5 days",
-  },
-];
 
 const BoldTableCell = styled(TableCell)({
   fontWeight: "bold",
@@ -73,13 +32,85 @@ const StyledNextLink = styled(NextLink)`
 function BookedTable() {
   const [repairComments, setRepairComments] = useState({});
   const router = useRouter();
+  const [bookeditems, setBookeditems] = useState([]);
 
+  
   const handleRepairCommentsChange = (imei, comments) => {
     setRepairComments((prevComments) => ({
       ...prevComments,
       [imei]: comments,
     }));
   };
+
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("Fetching data from the server...");
+        const response = await fetch(`${SERVER_URL}/booked`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("Server response status:", response.status);
+
+        if (response.status === 200) {
+          const responseData = await response.json();
+          console.log("Response data from the server:", responseData);
+
+          if (Array.isArray(responseData.body)) {
+            if (responseData.body.length > 0) {
+              const updatedBookedItems = responseData.body.map((customer) => ({
+                id: customer.id,
+                customerName: `${customer.firstName} ${customer.middleName} ${customer.lastName}`,
+                phoneNumber: customer.phoneNumber,
+                otherPhoneNumber: customer.otherPhoneNumber,
+                deviceMake: customer.deviceMake,
+                phoneModel: customer.model,
+                model: customer.model,
+                imei: customer.imei,
+
+               faults: [
+                customer.display !== "N/A" && customer.diplay !== "N/A" ? customer.display : null,
+                customer.sound !== "No" && customer.sound !== "N/A" ? customer.sound : null,
+                customer.power !== "No" && customer.power !== "N/A" ? customer.power : null,
+                customer.software !== "No" && customer.software !== "N/A" ? customer.software : null,
+              ].filter(Boolean).join(" "),
+
+                duration: calculateDuration(customer.createdAt),
+              }));
+              setBookeditems(updatedBookedItems);
+            } else {
+              console.log("No data received from the server");
+            }
+          } else {
+            console.error(
+              "Data from the server is not an array:",
+              responseData.body
+            );
+          }
+        } else {
+          console.error("Server error:", response.status);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const calculateDuration = (createdAt) => {
+    const currentDate = new Date();
+    const differenceInDays = Math.floor(
+      (currentDate - new Date(createdAt)) / (1000 * 60 * 60 * 24)
+    );
+    return `${differenceInDays} days`;
+  };
+
+
   return (
     <>
       <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -96,12 +127,12 @@ function BookedTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {customersData.map((customer) => (
+            {bookeditems.map((customer) => (
               <TableRow key={customer.id}>
                 <TableCell>{customer.customerName}</TableCell>
                 <TableCell>{customer.phoneNumber}</TableCell>
-                <TableCell>{customer.phoneMake}</TableCell>
-                <TableCell>{customer.phoneModel}</TableCell>
+                <TableCell>{customer.deviceMake}</TableCell>
+                <TableCell>{customer.model}</TableCell>
                 <TableCell>
                 <StyledNextLink
                     href={{

@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
   Box,
   Button,
   Card,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControl,
   Grid,
   InputLabel,
@@ -78,12 +83,13 @@ const sound = [
 const software = ["Goes on and off", "Needs software update", "Other", "N/A"];
 
 const Form1 = () => {
-  // const classes = useStyles();
+  const [loading, setLoading] = useState(false);
+  const [serverResponse, setServerResponse] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const formik = useFormik({
     initialValues: {
-    //   itemName: "",
-    //   quantity: "",
-    //   category: "",
+      //   itemName: "",
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
@@ -107,11 +113,9 @@ const Form1 = () => {
     setFormValues({ ...formValues, ...values });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const allFormValues = { ...formik.values, ...formValues };
-    handleNewBooking(allFormValues);
-    console.log('Submitted:', formik.values);
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setServerResponse(null);
   };
 
   const handleNewBooking = (allFormValues) => {
@@ -123,11 +127,15 @@ const Form1 = () => {
       },
       body: JSON.stringify(allFormValues),
     })
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        return response.json();
+        const data = await response.json();
+        console.log("server response:", data);
+
+        //handle success
+        return data;
       })
       .then((data) => {
         console.log("Server response:", data);
@@ -137,8 +145,22 @@ const Form1 = () => {
         console.error("There was a problem with the fetch operation:", error);
       });
   };
-
-  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const allFormValues = { ...formik.values, ...formValues };
+      const response = handleNewBooking(allFormValues);
+      // Display server response in dialog
+      setServerResponse(response);
+      setDialogOpen(true);
+    } catch (error) {
+      console.error("error Submitting form", error);
+    } finally {
+      setLoading(false);
+    }
+    console.log("Submitted:", formik.values);
+  };
 
   return (
     <>
@@ -658,6 +680,20 @@ const Form1 = () => {
                     </>
                   )}
                 </Grid>
+                {/* Dialog to display server response */}
+                <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="xs" fullWidth
+                 BackdropProps={{ style: { backgroundColor: "transparent" } }}
+                >
+                  <DialogTitle>Server Response</DialogTitle>
+                  <DialogContent  style={{ backgroundColor: "white" }}>
+                    <DialogContentText>{serverResponse}</DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary">
+                      Close
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </Grid>
             </div>
           ))}

@@ -89,7 +89,7 @@ function Summary() {
                 phoneModel: item.model,
                 model: item.model,
                 imei: item.imei,
-                duration: calculateDuration(item.dateOfPurchase),
+                duration: calculateDuration(item.createdAt),
               }));
               setBookeditems(updatedBookedItems);
             } else {
@@ -112,10 +112,10 @@ function Summary() {
     fetchData();
   }, []);
 
-  const calculateDuration = (dateOfPurchase) => {
+  const calculateDuration = (createdAt) => {
     const currentDate = new Date();
     const differenceInDays = Math.floor(
-      (currentDate - new Date(dateOfPurchase)) / (1000 * 60 * 60 * 24)
+      (currentDate - new Date(createdAt)) / (1000 * 60 * 60 * 24)
     );
     return `${differenceInDays} days`;
   };
