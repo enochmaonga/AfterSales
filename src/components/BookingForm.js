@@ -4,6 +4,10 @@ import {
   Box,
   Button,
   Card,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
   InputLabel,
   MenuItem,
@@ -33,6 +37,8 @@ const validationSchema = Yup.object().shape({
 function BookingForm({ initialValues, formValues, sections }) {
   const [step, setStep] = useState(1);
   const [capturedValues, setCapturedValues] = useState({});
+  const [serverResponse, setServerResponse] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handlePrint = () => {
     window.print();
@@ -55,9 +61,36 @@ function BookingForm({ initialValues, formValues, sections }) {
     }
   };
 
-  const handleSubmit = (values) => {
-    //perfom submission logic
-    console.log("Form Submitted:", values);
+  const handleSubmit = async (values) => {
+    // Perform submission logic, make an API call, etc.
+    try {
+      // Simulating an asynchronous API call
+      const response = await fetch("https://example.com/submit", {
+        method: "POST",
+        body: JSON.stringify(values),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const responseData = await response.json();
+
+      // Update the state with the server response
+      setServerResponse(responseData);
+
+      // Open the dialog
+      setIsDialogOpen(true);
+
+      // Do any other logic based on the server response if needed
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
+
+  const handleCloseDialog = () => {
+    // Close the dialog and reset the state
+    setIsDialogOpen(false);
+    setServerResponse(null);
   };
   const steps = [
     BookingFormStep1,
@@ -67,8 +100,6 @@ function BookingForm({ initialValues, formValues, sections }) {
   ];
 
   const CurrentStep = steps[step - 1];
-
- 
 
   return (
     <Formik
@@ -106,7 +137,6 @@ function BookingForm({ initialValues, formValues, sections }) {
                         section.fields.map((field) => (
                           <Typography key={field}>
                             {field}: {capturedValues[field]}
-                            
                           </Typography>
                         ))}
                     </div>
@@ -205,7 +235,7 @@ const BookingFormStep1 = ({ initialValues, step }) => {
         <Typography variant="h5">Personal Information</Typography>
       </Box>
       <Grid container spacing={2} sx={{ padding: 5 }}>
-      <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
           <TextField
             id="firstName"
             name="firstName"
@@ -477,35 +507,38 @@ const BookingFormSummary = ({ formValues, capturedValues, handlePrint }) => {
   ];
 
   return (
-    <Box sx={{ padding: 5 }}>
-      <Typography variant="h5">Summary</Typography>
-      {sections.map((section, index) => (
-        <div key={index}>
-          <Typography variant="subtitle1">{section.title}:</Typography>
-          {section.fields.map((field) => (
-            <Typography key={field}>
-              {field}: {capturedValues && capturedValues[field]}
-            </Typography>
-          ))}
-        </div>
-      ))}
-      <Grid container spacing={2} justifyContent="center" sx={{ padding: 5 }}>
-        <Grid item>
-          <Button
-            variant="contained"
-            sx={{ borderRadius: 3 }}
-            onClick={handlePrint}
-          >
-            Print
-          </Button>
+    <>
+      <Box sx={{ padding: 5 }}>
+        <Typography variant="h5">Summary</Typography>
+        {sections.map((section, index) => (
+          <div key={index}>
+            <Typography variant="subtitle1">{section.title}:</Typography>
+            {section.fields.map((field) => (
+              <Typography key={field}>
+                {field}: {capturedValues && capturedValues[field]}
+              </Typography>
+            ))}
+          </div>
+        ))}
+
+        <Grid container spacing={2} justifyContent="center" sx={{ padding: 5 }}>
+          <Grid item>
+            <Button
+              variant="contained"
+              sx={{ borderRadius: 3 }}
+              onClick={handlePrint}
+            >
+              Print
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" type="submit" sx={{ borderRadius: 3 }}>
+              Submit
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item>
-          <Button variant="contained" type="submit" sx={{ borderRadius: 3 }}>
-            Submit
-          </Button>
-        </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </>
   );
 };
 

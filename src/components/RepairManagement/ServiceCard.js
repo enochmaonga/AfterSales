@@ -10,7 +10,7 @@ import NextLink from "next/link";
 const validationSchema = Yup.object().shape({
   customerName: Yup.string().required("Customer Name is required"),
   phoneNumber: Yup.string().required("Phone Number is required"),
-  phoneMake: Yup.string().required("Phone Make is required"),
+  deviceMake: Yup.string().required("Phone Make is required"),
   phoneModel: Yup.string().required("Phone Model is required"),
   imei: Yup.string().required("IMEI is required"),
   faults: Yup.string().required("Faults is required"),
@@ -28,8 +28,8 @@ function ServiceCard() {
   }, []);
 
   const handleSubmit = (values) => {
-    // You can perform further actions with the form data, like sending it to an API
     console.log(values);
+    router.push("/customer");
   };
 
   return (
@@ -53,7 +53,7 @@ function ServiceCard() {
               initialValues={{
                 customerName: customer.customerName || "",
                 phoneNumber: customer.phoneNumber || "",
-                phoneMake: customer.phoneMake || "",
+                deviceMake: customer.deviceMake || "",
                 phoneModel: customer.phoneModel || "",
                 imei: customer.imei || "",
                 faults: customer.faults || "",
@@ -118,10 +118,10 @@ function ServiceCard() {
                     <Grid item xs={12} sm={6} md={8} xl={9}>
                       <Field
                         type="text"
-                        name="phoneMake"
+                        name="deviceMake"
                         style={{ width: "70%", height: "40px" }}
                       />
-                      <ErrorMessage name="phoneMake" component="div" />
+                      <ErrorMessage name="deviceMake" component="div" />
                     </Grid>
 
                     <Grid

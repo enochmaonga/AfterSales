@@ -27,7 +27,7 @@ const customersData = [
     id: 1,
     customerName: "John Doe",
     phoneNumber: "0773 764-309",
-    phoneMake: "iPhone",
+    deviceMake: "iPhone",
     phoneModel: "12 Pro",
     imei: "123456789012345",
     faults: "Does not power",
@@ -40,7 +40,7 @@ const customersData = [
     id: 2,
     customerName: "Jane Smith",
     phoneNumber: "0721 654-564",
-    phoneMake: "Samsung Galaxy",
+    deviceMake: "Samsung Galaxy",
     phoneModel: " S21",
     imei: "987654321098765",
     faults: "Does not power",
@@ -53,7 +53,7 @@ const customersData = [
     id: 3,
     customerName: "Andrew Mondo",
     phoneNumber: "0723 654-321",
-    phoneMake: "Samsung Galaxy",
+    deviceMake: "Samsung Galaxy",
     phoneModel: "A10",
     imei: "987654321786543",
     faults: "Broken screen",
@@ -66,7 +66,7 @@ const customersData = [
     id: 3,
     customerName: "Jackson Alex J",
     phoneNumber: "0723 654-321",
-    phoneMake: "Oppo",
+    deviceMake: "Oppo",
     phoneModel: "A9 2020",
     imei: "987654321786543",
     faults: "Forgot Passcode",
@@ -148,7 +148,7 @@ function RepairedTable() {
               <TableRow key={customer.id}>
                 <TableCell>{customer.customerName}</TableCell>
                 <TableCell>{customer.phoneNumber}</TableCell>
-                <TableCell>{customer.phoneMake}</TableCell>
+                <TableCell>{customer.deviceMake}</TableCell>
                 <TableCell>{customer.phoneModel}</TableCell>
                 <TableCell>{customer.imei}</TableCell>
                 <TableCell>{customer.faults}</TableCell>
@@ -185,7 +185,7 @@ function RepairedTable() {
               />
               <TextField
                 label="Phone Make"
-                value={selectedCustomer.phoneMake}
+                value={selectedCustomer.deviceMake}
                 fullWidth
                 style={{ marginTop: 12 }}
               />
@@ -197,7 +197,7 @@ function RepairedTable() {
               />
               <TextField
                 label="Phone Make"
-                value={selectedCustomer.phoneMake}
+                value={selectedCustomer.deviceMake}
                 fullWidth
                 style={{ marginTop: 12 }}
               />

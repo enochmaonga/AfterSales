@@ -7,11 +7,12 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { MenuItem, Select } from '@mui/material';
+import PropTypes from 'prop-types';
+import { SERVER_URL } from '@/config';
 
 const initialFormData = {
   itemCode: '',
   itemName: '',
-  itemPrice: '',
   unitPrice: '',
   supplier: '',
 };
@@ -59,13 +60,31 @@ const SparePartDialog = ({ open, onClose, onSave }) => {
       return;
     }
     try {
+      // Make API Call
+      const response = await fetch(`${SERVER_URL}/spares`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+      const responseData = await response.json();
+
+      console.log("Server Says:", responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || "Failed to Create spare part");
+      }
+      // on Success
+      console.log("formData", formData);
       await onSave(formData);
       setResponse({ type: 'success', message: 'Spare part created successfully' });
       setFormData(initialFormData);
     } catch (error) {
+      console.error("Error:", error.message);
       setResponse({
         type: 'error',
-        message: 'Failed to create spare Part. Please try again later',
+        message: 'Failed to create spare Part. Please try again later', errors
       });
     } finally {
       // Close the main dialog after saving, regardless of success or error
@@ -79,7 +98,7 @@ const SparePartDialog = ({ open, onClose, onSave }) => {
     // Reopen the main dialog when closing the response dialog
     setMainDialogOpen(true);
   };
-
+console.log("response", response);
   return (
     <>
       {mainDialogOpen && ( // Conditionally render the main dialog
@@ -166,6 +185,11 @@ const SparePartDialog = ({ open, onClose, onSave }) => {
       )}
     </>
   );
+};
+SparePartDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
 };
 
 export default SparePartDialog;
