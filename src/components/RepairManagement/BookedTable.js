@@ -1,3 +1,4 @@
+import React from "react";
 import { SERVER_URL } from "@/config";
 import {
   Table,
@@ -64,6 +65,7 @@ function BookedTable() {
             if (responseData.body.length > 0) {
               const updatedBookedItems = responseData.body.map((customer) => ({
                 id: customer.id,
+                _id: customer._id,
                 customerName: `${customer.firstName} ${customer.middleName} ${customer.lastName}`,
                 phoneNumber: customer.phoneNumber,
                 otherPhoneNumber: customer.otherPhoneNumber,
@@ -117,6 +119,7 @@ function BookedTable() {
         <Table aria-label="customer table">
           <TableHead>
             <TableRow>
+            <BoldTableCell>Booking Id</BoldTableCell>
               <BoldTableCell>Customer Name</BoldTableCell>
               <BoldTableCell>Phone Number</BoldTableCell>
               <BoldTableCell>Phone Make</BoldTableCell>
@@ -129,21 +132,22 @@ function BookedTable() {
           <TableBody>
             {bookeditems.map((customer) => (
               <TableRow key={customer.id}>
-                <TableCell>{customer.customerName}</TableCell>
-                <TableCell>{customer.phoneNumber}</TableCell>
-                <TableCell>{customer.deviceMake}</TableCell>
-                <TableCell>{customer.model}</TableCell>
                 <TableCell>
                 <StyledNextLink
                     href={{
                       pathname: "/service-form",
-                      query: { imei: customer.imei, ...customer },
+                      query: { _id: customer._id, ...customer },
                     }}
                     passHref
                   >
-                    {customer.imei}
+                    {customer._id}
                   </StyledNextLink>
                   </TableCell>
+                <TableCell>{customer.customerName}</TableCell>
+                <TableCell>{customer.phoneNumber}</TableCell>
+                <TableCell>{customer.deviceMake}</TableCell>
+                <TableCell>{customer.model}</TableCell>
+                <TableCell>{customer.imei}</TableCell>
                 <TableCell>{customer.faults}</TableCell>
                 <TableCell>{customer.duration}</TableCell>
               </TableRow>

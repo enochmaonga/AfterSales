@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableHead,
@@ -8,9 +8,6 @@ import {
   Paper,
   Grid,
   Typography,
-  Tabs,
-  Tab,
-  Box,
   InputAdornment,
   TextField,
   IconButton,
@@ -22,31 +19,83 @@ import PageContainer from "../PageContainer";
 import PageSection from "../PageSection";
 import SparePartDialog from "./SparePartDialog";
 import ReceiveSparesDialog from "./ReceiveSparesDialog";
+import { SERVER_URL } from "@/config";
 
 const BoldTableCell = styled(TableCell)({
   fontWeight: "bold",
   backgroundColor: "skyblue",
 });
 
-function Inventory({ data }) {
+function Inventory() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [inventory, setInventory] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
     const [isCreateDialogOpen, setCreateDialogOpen] = useState(false); // Create dialog state
   const [isReceiveDialogOpen, setReceiveDialogOpen] = useState(false);
 
   const handleSearchInputChange = (event) => {
-    setSearchTerm(event.target.value);
+    const newSearchTerm = event.target.value;
+    setSearchTerm(newSearchTerm);
+
+    if (newSearchTerm === "") {
+      setFilteredData(inventory);
+    }
   };
 
   const handleSearchButtonClick = () => {
-    const filteredItems = data.filter((item) =>
+    const filteredItems = inventory.filter((item) =>
       item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredData(filteredItems);
   };
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("Fetching data from the server...");
+        const response = await fetch(`${SERVER_URL}/sparesInventory`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("Server response status:", response.status);
+
+        if (response.status === 200) {
+          const responseData = await response.json();
+          console.log("Response data from the server:", responseData);
+
+          if (Array.isArray(responseData.body)) {
+            if (responseData.body.length > 0) {
+              const fetchedItems = responseData.body.map((item) => ({
+                itemCode: item.itemCode,
+                itemName: item.itemName,
+                qty: item.qty,
+                unitPrice: item.unitPrice,
+        
+              }));
+              setFilteredData(fetchedItems);
+            } else {
+              console.log("No data received from the server");
+            }
+          } else {
+            console.error(
+              "Data from the server is not an array:",
+              responseData.body
+            );
+          }
+        } else {
+          console.error("Server error:", response.status);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   // Calculate total units and total value
   const totalUnits = filteredData.reduce((total, item) => total + item.qty, 0);

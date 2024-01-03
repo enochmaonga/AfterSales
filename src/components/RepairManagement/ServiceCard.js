@@ -1,11 +1,19 @@
-import { Button, Card, CardContent, Grid, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Typography,
+} from "@mui/material";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import PageContainer from "../PageContainer";
 import PageSection from "../PageSection";
 import NextLink from "next/link";
+import { SERVER_URL } from "@/config";
 
 const validationSchema = Yup.object().shape({
   customerName: Yup.string().required("Customer Name is required"),
@@ -21,15 +29,44 @@ const validationSchema = Yup.object().shape({
 
 function ServiceCard() {
   const router = useRouter();
-  const { imei, ...customer } = router.query; // Get the customer information from query
-
+  const { _id, ...customer } = router.query; // Get the customer information from query
+  const [isLoading, setIsLoading] = useState(false);
+console.log("Customer info:", router.query);
   useEffect(() => {
     // Any additional logic you might have here
   }, []);
 
-  const handleSubmit = (values) => {
-    console.log(values);
-    router.push("/customer");
+  const handleSubmit = async (values) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${SERVER_URL}/repaired?_id=${values._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sparePartUsed: values.spareUsed,
+          repairComments: values.comments,
+           status: values.status,
+        }),
+      });
+      console.log("Move item:", _id);
+      console.log("Response from backend:", response);
+      if (response.ok) {
+        // Item successfully moved to Repaired bucket
+        const responseData = await response.json();
+        console.log("Item marked as repaired:", responseData);
+        router.push("/collection");
+  
+      } else {
+        // Handle errors, e.g., spare part not available, item not found, etc.
+        console.error(
+          "Failed to move item to Repaired bucket:", response);
+      }
+    } catch (error) {
+      console.error("Error while submitting:", error);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -60,6 +97,8 @@ function ServiceCard() {
                 duration: customer.duration || "",
                 comments: "",
                 spareUsed: "",
+                _id: _id || "",
+                status: "",
               }}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
@@ -186,6 +225,7 @@ function ServiceCard() {
                       md={4}
                       xl={3}
                       style={{ textAlign: "center" }}
+                      key="imei"
                     >
                       <label>IMEI:</label>
                     </Grid>
@@ -213,7 +253,7 @@ function ServiceCard() {
                       <Field
                         as="textarea"
                         name="comments"
-                        style={{ width: "70%", height: "40px" }}
+                        style={{ width: "70%", height: "40px", fontSize: "15px" }}
                       />
                       <ErrorMessage name="comments" component="div" />
                     </Grid>
@@ -240,6 +280,7 @@ function ServiceCard() {
                         <option value="spare4">Power Button</option>
                         {/* Add more spare parts as needed */}
                       </Field>
+                      <Field type="hidden" name="status" value={values.status} />
                       <ErrorMessage name="spareUsed" component="div" />
                     </Grid>
                   </Grid>
@@ -255,7 +296,11 @@ function ServiceCard() {
                         variant="contained"
                         sx={{ borderRadius: 5, mt: 5 }}
                       >
-                        Submit
+                        {isLoading ? (
+                          <CircularProgress size={24} color="inherit" />
+                        ) : (
+                          "Submit"
+                        )}
                       </Button>
                     </Grid>
                     <Grid item>
