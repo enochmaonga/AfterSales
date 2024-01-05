@@ -31,7 +31,7 @@ function ServiceCard() {
   const router = useRouter();
   const { _id, ...customer } = router.query; // Get the customer information from query
   const [isLoading, setIsLoading] = useState(false);
-console.log("Customer info:", router.query);
+  console.log("Customer info:", router.query);
   useEffect(() => {
     // Any additional logic you might have here
   }, []);
@@ -39,7 +39,8 @@ console.log("Customer info:", router.query);
   const handleSubmit = async (values) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${SERVER_URL}/repaired?_id=${values._id}`, {
+
+      const response = await fetch(`${SERVER_URL}/repaired?_id=${_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -47,21 +48,22 @@ console.log("Customer info:", router.query);
         body: JSON.stringify({
           sparePartUsed: values.spareUsed,
           repairComments: values.comments,
-           status: values.status,
+          status: "repaired",
         }),
       });
-      console.log("Move item:", _id);
+      console.log(
+        "PUT request URL:",
+        `${SERVER_URL}/repaired?_id=${values._id}`
+      );
       console.log("Response from backend:", response);
       if (response.ok) {
         // Item successfully moved to Repaired bucket
         const responseData = await response.json();
         console.log("Item marked as repaired:", responseData);
         router.push("/collection");
-  
       } else {
         // Handle errors, e.g., spare part not available, item not found, etc.
-        console.error(
-          "Failed to move item to Repaired bucket:", response);
+        console.error("Failed to move item to Repaired bucket:", response);
       }
     } catch (error) {
       console.error("Error while submitting:", error);
@@ -253,10 +255,15 @@ console.log("Customer info:", router.query);
                       <Field
                         as="textarea"
                         name="comments"
-                        style={{ width: "70%", height: "40px", fontSize: "15px" }}
+                        style={{
+                          width: "70%",
+                          height: "40px",
+                          fontSize: "15px",
+                        }}
                       />
                       <ErrorMessage name="comments" component="div" />
                     </Grid>
+
                     <Grid
                       item
                       xs={12}
@@ -280,7 +287,11 @@ console.log("Customer info:", router.query);
                         <option value="spare4">Power Button</option>
                         {/* Add more spare parts as needed */}
                       </Field>
-                      <Field type="hidden" name="status" value={values.status} />
+                      <Field
+                        type="hidden"
+                        name="status"
+                        value={values.status}
+                      />
                       <ErrorMessage name="spareUsed" component="div" />
                     </Grid>
                   </Grid>
@@ -295,12 +306,9 @@ console.log("Customer info:", router.query);
                         type="submit"
                         variant="contained"
                         sx={{ borderRadius: 5, mt: 5 }}
+                        onClick={handleSubmit}
                       >
-                        {isLoading ? (
-                          <CircularProgress size={24} color="inherit" />
-                        ) : (
-                          "Submit"
-                        )}
+                        Submit
                       </Button>
                     </Grid>
                     <Grid item>
