@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -19,8 +19,10 @@ import {
   Box,
 } from "@mui/material";
 import { useState } from "react";
+import NextLink from "next/link";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
+import { SERVER_URL } from "@/config";
 
 const customersData = [
   {
@@ -82,12 +84,19 @@ const BoldTableCell = styled(TableCell)({
   backgroundColor: "skyblue",
 });
 
+const StyledNextLink = styled(NextLink)`
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Display inline with other items */
+  
+`;
+
 function RepairedTable() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pickedBy, setPickedBy] = useState("");
   const [closedRecord, setClosedRecord] = useState(false);
+  const [repairedItems, setRepairedItems] = useState([]);
 
   const handleOpenDialog = (customer) => {
     setSelectedCustomer(customer);
@@ -125,6 +134,93 @@ function RepairedTable() {
     }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("Fetching data from the server...");
+        const response = await fetch(`${SERVER_URL}/repaired`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("Server response status:", response.status);
+
+        if (response.status === 200) {
+          const responseData = await response.json();
+          console.log("Response data from the server:", responseData);
+
+          if (Array.isArray(responseData.body)) {
+            if (responseData.body.length > 0) {
+              const updatedRepairedItems = responseData.body.map(
+                (customer) => ({
+                  id: customer.id,
+                  customerName: `${customer.firstName} ${customer.middleName} ${customer.lastName}`,
+                  phoneNumber: customer.phoneNumber,
+
+                  deviceMake: customer.deviceMake,
+                  phoneModel: customer.model,
+                  model: customer.model,
+                  imei: customer.imei,
+                  repairComments: customer.repairComments,
+                  sparePartUsed: customer.sparePartUsed,
+                  _id: customer._id,
+
+                  faults: [
+                    customer.display !== "N/A" && customer.diplay !== "N/A"
+                      ? customer.display
+                      : null,
+                    customer.sound !== "No" && customer.sound !== "N/A"
+                      ? customer.sound
+                      : null,
+                    customer.power !== "No" && customer.power !== "N/A"
+                      ? customer.power
+                      : null,
+                    customer.software !== "No" && customer.software !== "N/A"
+                      ? customer.software
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" "),
+
+                  duration: calculateDuration(customer.createdAt),
+                })
+              );
+              setRepairedItems(updatedRepairedItems);
+            } else {
+              console.log("No data received from the server");
+            }
+          } else {
+            console.error(
+              "Data from the server is not an array:",
+              responseData.body
+            );
+          }
+        } else {
+          console.error("Server error:", response.status);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const calculateDuration = (createdAt) => {
+    const currentDate = new Date();
+    const differenceInDays = Math.floor(
+      (currentDate - new Date(createdAt)) / (1000 * 60 * 60 * 24)
+    );
+    return `${differenceInDays} days`;
+  };
+
+  const handleOpenPickupDialog = (customer) => {
+    // Implement the logic to open the dialog and set the selected customer
+    setSelectedCustomer(customer);
+    setOpenDialog(true);
+  };
+
   return (
     <>
       <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -144,7 +240,7 @@ function RepairedTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {customersData.map((customer) => (
+            {repairedItems.map((customer) => (
               <TableRow key={customer.id}>
                 <TableCell>{customer.customerName}</TableCell>
                 <TableCell>{customer.phoneNumber}</TableCell>
@@ -153,19 +249,18 @@ function RepairedTable() {
                 <TableCell>{customer.imei}</TableCell>
                 <TableCell>{customer.faults}</TableCell>
                 <TableCell>{customer.duration}</TableCell>
-                <TableCell>{customer.comments}</TableCell>
-                <TableCell>{customer.spareUsed}</TableCell>
+                <TableCell>{customer.repairComments}</TableCell>
+                <TableCell>{customer.sparePartUsed}</TableCell>
                 <TableCell>
-                  {customer.customerPickUp === "Create Pick-up" ? (
-                    <Button
-                      onClick={() => handleOpenDialog(customer)}
-                      sx={{ textTransform: "none" }}
-                    >
-                      Create Pick-up
-                    </Button>
-                  ) : (
-                    customer.customerPickUp
-                  )}
+                   <StyledNextLink
+                    href={{
+                      pathname: "Create pick-up",
+                    }}
+                    passHref
+                    onClick={() => handleOpenPickupDialog(customer)}
+                  >
+                    Create Pick-up
+                  </StyledNextLink>
                 </TableCell>
               </TableRow>
             ))}

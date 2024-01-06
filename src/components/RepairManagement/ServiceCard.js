@@ -39,6 +39,9 @@ function ServiceCard() {
   const handleSubmit = async (values) => {
     try {
       setIsLoading(true);
+      
+// TO DO, Item marked repaired and a repaired record created but in duplicates and The repaired item is not
+// deleted from booked.
 
       const response = await fetch(`${SERVER_URL}/repaired?_id=${_id}`, {
         method: "PUT",
